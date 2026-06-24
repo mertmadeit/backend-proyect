@@ -6,7 +6,6 @@ import lombok.Data;
 @Data
 public class FacturaRequest {
     private Long id;
-    private Integer numero;
     private String detalles;
     private Integer valor;
 

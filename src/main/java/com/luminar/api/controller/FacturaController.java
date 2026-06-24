@@ -10,6 +10,7 @@ import com.luminar.api.repository.EstadoFacturaRepository;
 import com.luminar.api.repository.FacturaRepository;
 import com.luminar.api.repository.FormaPagoRepository;
 import com.luminar.api.service.FacturaPdfService;
+import com.luminar.api.service.FacturaNumeroService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -42,6 +43,9 @@ public class FacturaController {
     @Autowired
     private FacturaPdfService facturaPdfService;
 
+    @Autowired
+    private FacturaNumeroService facturaNumeroService;
+
     @GetMapping
     public List<Factura> getAll() {
         return repository.findAllByOrderByIdDesc();
@@ -67,16 +71,6 @@ public class FacturaController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/check-duplicate")
-    public ResponseEntity<Map<String, Boolean>> checkDuplicate(
-            @RequestParam Integer numero,
-            @RequestParam(required = false) Long excludeId) {
-        boolean exists = excludeId == null
-                ? repository.existsByNumero(numero)
-                : repository.existsByNumeroAndIdNot(numero, excludeId);
-        return ResponseEntity.ok(Map.of("exists", exists));
-    }
-
     @PostMapping
     public ResponseEntity<?> create(@RequestBody FacturaRequest req) {
         Cliente cliente = clienteRepository.findById(req.getIdCliente()).orElse(null);
@@ -87,11 +81,12 @@ public class FacturaController {
             return ResponseEntity.badRequest().body(Map.of("error", "Referencia no encontrada"));
         }
 
+        Integer numero = facturaNumeroService.siguienteNumero();
         Factura factura = new Factura();
-        factura.setNumero(req.getNumero());
+        factura.setNumero(numero);
         factura.setDetalles(req.getDetalles());
         factura.setValor(req.getValor());
-        factura.setArchivo(nombreArchivo(req.getNumero()));
+        factura.setArchivo(nombreArchivo(numero));
         factura.setCliente(cliente);
         factura.setFormaPago(forma);
         factura.setEstadoFactura(estado);
@@ -110,10 +105,8 @@ public class FacturaController {
                 return ResponseEntity.badRequest().body((Object) Map.of("error", "Referencia no encontrada"));
             }
 
-            factura.setNumero(req.getNumero());
             factura.setDetalles(req.getDetalles());
             factura.setValor(req.getValor());
-            factura.setArchivo(nombreArchivo(req.getNumero()));
             factura.setCliente(cliente);
             factura.setFormaPago(forma);
             factura.setEstadoFactura(estado);
