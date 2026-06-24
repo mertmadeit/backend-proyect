@@ -22,15 +22,18 @@ import java.util.stream.Collectors;
 public class SecurityConfig {
 
     private final ApiKeyFilter apiKeyFilter;
+    private final RoleAuthorizationFilter roleAuthorizationFilter;
     private final String allowedOrigins;
     private final String allowedOriginPatterns;
 
     public SecurityConfig(
         ApiKeyFilter apiKeyFilter,
+        RoleAuthorizationFilter roleAuthorizationFilter,
         @Value("${app.cors.allowed-origins:http://localhost:3000}") String allowedOrigins,
         @Value("${app.cors.allowed-origin-patterns:https://*.up.railway.app}") String allowedOriginPatterns
     ) {
         this.apiKeyFilter = apiKeyFilter;
+        this.roleAuthorizationFilter = roleAuthorizationFilter;
         this.allowedOrigins = allowedOrigins;
         this.allowedOriginPatterns = allowedOriginPatterns;
     }
@@ -44,7 +47,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .anyRequest().permitAll()
             )
-            .addFilterBefore(apiKeyFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(apiKeyFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterAfter(roleAuthorizationFilter, ApiKeyFilter.class);
 
         return http.build();
     }
