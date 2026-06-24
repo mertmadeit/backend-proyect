@@ -11,7 +11,7 @@ public class FacturaRequest {
     private Integer valor;
 
     @JsonProperty("idCliente")
-    private String idCliente;
+    private Long idCliente;
 
     @JsonProperty("idforma")
     private Long idforma;

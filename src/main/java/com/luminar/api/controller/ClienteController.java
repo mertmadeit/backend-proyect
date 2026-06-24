@@ -22,12 +22,12 @@ public class ClienteController {
 
     @GetMapping
     public List<Cliente> getAll() {
-        return repository.findAllByRfcIsNotNullOrderByCreatedAtDesc();
+        return repository.findAllByOrderByCreatedAtDesc();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Cliente> getById(@PathVariable String id) {
-        return repository.findByIdAndRfcIsNotNull(id)
+    public ResponseEntity<Cliente> getById(@PathVariable Long id) {
+        return repository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -42,12 +42,11 @@ public class ClienteController {
             return ResponseEntity.status(409).body(Map.of("error", "El correo ya está registrado"));
         }
         cliente.setId(null);
-        cliente.setRole("cliente");
         return ResponseEntity.ok(repository.save(cliente));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable String id, @RequestBody Cliente details) {
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Cliente details) {
         normalizar(details);
         if (!datosValidos(details)) {
             return ResponseEntity.badRequest().body(Map.of("error", "Completa todos los datos del cliente"));
@@ -55,7 +54,7 @@ public class ClienteController {
         if (repository.existsByEmailIgnoreCaseAndIdNot(details.getEmail(), id)) {
             return ResponseEntity.status(409).body(Map.of("error", "El correo ya pertenece a otro usuario"));
         }
-        return repository.findByIdAndRfcIsNotNull(id).map(cliente -> {
+        return repository.findById(id).map(cliente -> {
             cliente.setNombre(details.getNombre());
             cliente.setRfc(details.getRfc());
             cliente.setDireccion(details.getDireccion());
@@ -82,19 +81,12 @@ public class ClienteController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable String id) {
-        return repository.findByIdAndRfcIsNotNull(id).map(cliente -> {
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+        return repository.findById(id).map(cliente -> {
             if (facturaRepository.existsByClienteId(id)) {
                 return ResponseEntity.status(409).body("El cliente tiene facturas relacionadas");
             }
-            if ("cliente".equals(cliente.getRole())) {
-                repository.delete(cliente);
-            } else {
-                cliente.setRfc(null);
-                cliente.setDireccion(null);
-                cliente.setTelefono(null);
-                repository.save(cliente);
-            }
+            repository.delete(cliente);
             return ResponseEntity.ok().body("Cliente eliminado");
         }).orElse(ResponseEntity.notFound().build());
     }

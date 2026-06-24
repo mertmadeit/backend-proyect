@@ -14,5 +14,5 @@ public interface FacturaRepository extends JpaRepository<Factura, Long> {
 
     boolean existsByNumeroAndIdNot(Integer numero, Long id);
 
-    boolean existsByClienteId(String clienteId);
+    boolean existsByClienteId(Long clienteId);
 }

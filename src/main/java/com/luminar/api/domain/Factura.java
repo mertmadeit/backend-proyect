@@ -52,7 +52,7 @@ public class Factura {
     private LocalDateTime updatedAt;
 
     // Expose FK IDs for JSON serialization (read from the relationship)
-    public String getIdCliente() {
+    public Long getIdCliente() {
         return cliente != null ? cliente.getId() : null;
     }
 

@@ -79,7 +79,7 @@ public class FacturaController {
 
     @PostMapping
     public ResponseEntity<?> create(@RequestBody FacturaRequest req) {
-        Cliente cliente = clienteRepository.findByIdAndRfcIsNotNull(req.getIdCliente()).orElse(null);
+        Cliente cliente = clienteRepository.findById(req.getIdCliente()).orElse(null);
         FormaPago forma = formaPagoRepository.findById(req.getIdforma()).orElse(null);
         EstadoFactura estado = estadoFacturaRepository.findById(req.getIdestado()).orElse(null);
 
@@ -102,7 +102,7 @@ public class FacturaController {
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody FacturaRequest req) {
         return repository.findById(id).map(factura -> {
-            Cliente cliente = clienteRepository.findByIdAndRfcIsNotNull(req.getIdCliente()).orElse(null);
+            Cliente cliente = clienteRepository.findById(req.getIdCliente()).orElse(null);
             FormaPago forma = formaPagoRepository.findById(req.getIdforma()).orElse(null);
             EstadoFactura estado = estadoFacturaRepository.findById(req.getIdestado()).orElse(null);
 
