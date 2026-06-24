@@ -10,4 +10,8 @@ public interface ClienteRepository extends JpaRepository<Cliente, String> {
     List<Cliente> findAllByRfcIsNotNullOrderByCreatedAtDesc();
 
     Optional<Cliente> findByIdAndRfcIsNotNull(String id);
+
+    boolean existsByEmailIgnoreCase(String email);
+
+    boolean existsByEmailIgnoreCaseAndIdNot(String email, String id);
 }
