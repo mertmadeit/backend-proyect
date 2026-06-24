@@ -44,7 +44,7 @@ public class FacturaController {
 
     @GetMapping
     public List<Factura> getAll() {
-        return repository.findAll();
+        return repository.findAllByOrderByIdDesc();
     }
 
     @GetMapping("/{id}")
@@ -71,10 +71,9 @@ public class FacturaController {
     public ResponseEntity<Map<String, Boolean>> checkDuplicate(
             @RequestParam Integer numero,
             @RequestParam(required = false) Long excludeId) {
-        List<Factura> all = repository.findAll();
-        boolean exists = all.stream().anyMatch(f ->
-                f.getNumero().equals(numero) && (excludeId == null || !f.getId().equals(excludeId))
-        );
+        boolean exists = excludeId == null
+                ? repository.existsByNumero(numero)
+                : repository.existsByNumeroAndIdNot(numero, excludeId);
         return ResponseEntity.ok(Map.of("exists", exists));
     }
 
