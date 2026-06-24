@@ -6,37 +6,46 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Entity
-@Table(name = "clientes")
+@Table(name = "user")
 public class Cliente {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(columnDefinition = "int unsigned")
-    private Long id;
+    @Column(length = 36)
+    private String id;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     private String nombre;
 
-    @Column(nullable = false)
+    @Column
     private String rfc;
 
-    @Column(nullable = false)
+    @Column
     private String direccion;
 
-    @Column(nullable = false)
+    @Column
     private String telefono;
 
     @Column(nullable = false)
     private String email;
 
+    @Column(nullable = false, length = 32)
+    private String role = "cliente";
+
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "createdAt", updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at")
+    @Column(name = "updatedAt")
     private LocalDateTime updatedAt;
+
+    @PrePersist
+    private void prepararCliente() {
+        if (id == null || id.isBlank()) id = UUID.randomUUID().toString();
+        if (role == null || role.isBlank()) role = "cliente";
+    }
 }
